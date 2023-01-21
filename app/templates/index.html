@@ -1,15 +1,29 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-    <h1>You're doing it!</h1>
+    <h1>Posts</h1>
     <br>
     <table class="table table-hover">
-        <tr>
-            <td>
-                <br>
-                <span id="post1">This is my one and only blog post. Can you add more using a for loop?</span>
-            </td>
-        </tr>
+        {% if posts|length == 0 %}
+            <tr>No Data Found</tr>
+        {% else %}
+            <tr>
+                <th>Id</th>
+                <th>Body</th>
+                <th>Created At</th>
+                <th>Created By</th>
+                <th>Language</th>
+            </tr>
+            {% for blog in posts %}
+                <tr>
+                    <td>{{blog.id}}</td>
+                    <td>{{blog.body}}</td>
+                    <td>{{blog.timestamp.strftime('%Y-%m-%d %H:%M:%S')}}</td>
+                    <td>{{blog.author.username}}</td>
+                    <td>{{blog.language}}</td>
+                </tr>
+            {% endfor %}
+        {% endif %}
     </table>
     <nav aria-label="...">
         <ul class="pager">

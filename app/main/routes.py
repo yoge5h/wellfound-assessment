@@ -11,15 +11,34 @@ from app.models import User, Post, Message, Notification
 from app.translate import translate
 from app.main import bp
 
+@bp.route('/prepare-data', methods=['POST'])
+def prepare_dummy_data():
+    usr = User.query.filter_by(username='Yogesh').first()
+    if not usr:
+        usr = User(username='Yogesh', email='a@b.com')
+        usr.set_password('Test!1')
+        db.session.add(usr)
+        db.session.commit()
+
+    posts = [('my first post!', 'EN'), ('my second post!', 'EN'), ('my third post!', 'EN'), ('my fourth post!', 'EN'), ('my fifth post!', 'EN')]
+    for post, lang in posts:
+        post = Post(body=post, language=lang, user_id=usr.id)
+        db.session.add(post)
+        db.session.commit()
+    return jsonify({'message':"Data added successfully"}), 200
+
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
 def index():
-    posts = [Post(body='my first post!', user_id=1, language='EN'),
-             Post(body='my second post!', user_id=2, language='EN'),
-             Post(body='my third post!', user_id=3, language='EN'),
-             Post(body='my fourth post!', user_id=1, language='EN'),
-             Post(body='my fifth post!', user_id=2, language='EN')]
-    return render_template('index.html', title=_('Home'), posts=posts)
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(
+        Post.timestamp.desc()
+    ).paginate(
+        page, 
+        current_app.config['POSTS_PER_PAGE'],
+        False
+    )
+    return render_template('index.html', title=_('Home'), posts=posts.items)
 
 
 @bp.route('/explore')
